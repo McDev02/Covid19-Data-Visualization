@@ -19,7 +19,7 @@ public class DataReaderV1 : DataReader
 	const string FILENAME_RECOVERED = "time_series_covid19_recovered_global.csv";
 	const string FILENAME_DEATHS = "time_series_covid19_deaths_global.csv";
 
-	protected override void LoadData()
+	protected override IEnumerator LoadData()
 	{
 		database.dates = ReadDates();
 		var confirmed = LoadAndReadTimetable(FILENAME_CONFIRMED);
@@ -58,6 +58,8 @@ public class DataReaderV1 : DataReader
 			data.Timeline = CombineTimelineData(confirmedData, recoveredData, deathsData);
 			database.timelineDataByLocation.Add(location, data);
 		}
+
+		yield return null;
 
 		CollectWorldData();
 

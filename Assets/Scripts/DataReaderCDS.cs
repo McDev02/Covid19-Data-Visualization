@@ -84,8 +84,7 @@ public class DataReaderCDS : DataReader
 		}
 	}
 
-
-	protected override void LoadData()
+	protected override IEnumerator LoadData()
 	{
 		var csvData = LoadAndReadTimetable(FILENAME);
 		database.dates = ReadDates(csvData);
@@ -112,6 +111,7 @@ public class DataReaderCDS : DataReader
 				csvDataByLocation[d.Location.ID] = list;
 			}
 		}
+		yield return null;
 
 		//Sort Data by Time (Might not be necessary)
 		var keys = csvDataByLocation.Keys.ToArray();
@@ -142,6 +142,9 @@ public class DataReaderCDS : DataReader
 			}
 			csvDataByLocation[keys[i]] = list;
 		}
+		yield return null;
+
+		int yieldCounter = 0;
 
 		//For each country
 		database.timelineDataByLocation = new Dictionary<string, LocationTimelineData>();
@@ -177,6 +180,12 @@ public class DataReaderCDS : DataReader
 				else if (lastData != null)
 				{
 					data.Timeline.Add(d2.Timestamp, lastData.data);
+				}
+
+				if (yieldCounter++ > 2000)
+				{
+					yieldCounter = 0;
+					yield return null;
 				}
 			}
 

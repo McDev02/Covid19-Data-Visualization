@@ -15,6 +15,8 @@ public class DiagramController : MonoBehaviour
 	UIDIagramLegend[] legendEntires;
 
 	ComponentPool<Image> barchartPool;
+	bool showDelta;
+	[SerializeField] Text valueButtonLable;
 
 	DataSet[] lastValues;
 	DataCategory category;
@@ -22,7 +24,15 @@ public class DiagramController : MonoBehaviour
 	private void Awake()
 	{
 		barchartPool = new ComponentPool<Image>(barchartContainer, barchartPrefab);
+		showDelta = false;
+
 		GenerateLegend();
+	}
+
+	public void OnShowDeltaChanged()
+	{
+		showDelta = !showDelta;
+		UpdateBarChart(lastValues);
 	}
 
 	void GenerateLegend()
@@ -49,6 +59,8 @@ public class DiagramController : MonoBehaviour
 
 	private void UpdateLegend(float maxValue)
 	{
+		valueButtonLable.text = showDelta ? "Delta values" : "Absolute";
+
 		for (int i = 0; i < legendEntryCount; i++)
 		{
 			int val = (int)(maxValue * ((legendEntryCount - i) / (float)legendEntryCount));
@@ -83,6 +95,10 @@ public class DiagramController : MonoBehaviour
 		barchartPool.Reset();
 		float maxValue = 0;
 
+		if (showDelta)
+			values = GetDeltaValues(values);
+
+		//Calculate max Value
 		for (int i = 0; i < values.Length; i++)
 		{
 			int val = 0;
@@ -106,8 +122,7 @@ public class DiagramController : MonoBehaviour
 				maxValue = val;
 		}
 
-		UpdateLegend(maxValue);
-
+		//show Value
 		for (int i = 0; i < values.Length; i++)
 		{
 			int val = 0;
@@ -130,5 +145,26 @@ public class DiagramController : MonoBehaviour
 			var bar = barchartPool.Get(i);
 			bar.fillAmount = val / maxValue;
 		}
+
+		UpdateLegend(maxValue);
+	}
+
+	private DataSet[] GetDeltaValues(DataSet[] values)
+	{
+		DataSet[] delta = new DataSet[values.Length - 1];
+		for (int i = 0; i < values.Length - 1; i++)
+		{
+			var a = values[i];
+			var b = values[i + 1];
+			delta[i] = new DataSet()
+			{
+				Confirmed = b.Confirmed - a.Confirmed,
+				Active = b.Active - a.Active,
+				Deaths = b.Deaths - a.Deaths,
+				Recovered = b.Recovered - a.Recovered
+			};
+		}
+
+		return delta;
 	}
 }

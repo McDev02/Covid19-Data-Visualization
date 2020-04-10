@@ -24,7 +24,7 @@ public abstract class DataReader : MonoBehaviour
 
 	private void Start()
 	{
-		LoadData();
+		StartCoroutine(LoadData());
 	}
 
 	protected void CollectWorldData()
@@ -73,7 +73,7 @@ public abstract class DataReader : MonoBehaviour
 		}
 	}
 
-	protected abstract void LoadData();
+	protected abstract IEnumerator LoadData();
 
 	protected int GetSafeIntFromArray(int[] arr, int id)
 	{

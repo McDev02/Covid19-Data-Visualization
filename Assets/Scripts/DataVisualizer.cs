@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections.Generic;
 using System;
+using System.Collections;
 
 public class DataVisualizer : MonoBehaviour
 {
@@ -45,7 +46,7 @@ public class DataVisualizer : MonoBehaviour
 
 	public void UpdateVisualization()
 	{
-		UpdateCases(timeID, visualizationData);
+		StartCoroutine(UpdateCases(timeID, visualizationData));
 	}
 
 	void CalculateMaxInfectedCount()
@@ -90,7 +91,7 @@ public class DataVisualizer : MonoBehaviour
 		UpdateVisualization();
 	}
 
-	void UpdateCases(int t, DataCategory category)
+	IEnumerator UpdateCases(int t, DataCategory category)
 	{
 		var date = db.dates[t];
 		var values = db.timelineDataByLocation.Values;
@@ -128,6 +129,8 @@ public class DataVisualizer : MonoBehaviour
 		}
 
 		indicatorPool.Reset();
+
+		int yieldCounter = 0;
 		int i = 0;
 		foreach (var timeline in values)
 		{
@@ -164,7 +167,14 @@ public class DataVisualizer : MonoBehaviour
 			indicator.transform.localPosition = GeoToVector(location.Lat, location.Long, radius);
 			value = (value - minValue) / (maxValue - minValue);
 			indicator.transform.localScale = Vector3.one * (dotScaleFactor * Mathf.Lerp(minSize, maxSize, Mathf.Sqrt(value)));
+
+			//if (yieldCounter++ > 100)
+			//{
+			//	yieldCounter = 0;
+			//	yield return null;
+			//}
 		}
+		yield return null;
 	}
 
 	Vector3 GeoToVector(float lat, float lon, float radius = 1)
